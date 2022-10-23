@@ -85,7 +85,7 @@
                             type: '<%=form_type%>'
                         })
                     }).then(val => val.json()).then(new_val_json => {
-                        form_new_id = new_val_json.id.insertedId
+                        form_new_id = new_val_json
                     })
                 <% } else { %>
                     form_new_id = <%=form_id%>
