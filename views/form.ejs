@@ -43,7 +43,7 @@
 <body id="body">
 <form>
     <% form.forEach(function(field) { %>
-        <% if (field.field_type === 'checkbox') { %>
+        <% if (field.field_type == 'checkbox') { %>
             <fieldset>
                 <legend><%= field.field_name %></legend>
                 <% Object.values(field.field_values).forEach(function(box) { %>
@@ -51,7 +51,7 @@
                 <% }) %>
             </fieldset>
         <% } %>
-        <% if (field.field_type === 'radiobox') { %>
+        <% if (field.field_type == 'radiobox') { %>
             <fieldset>
                 <legend><%= field.field_name %></legend>
                 <% Object.values(field.field_values).forEach(function(box) { %>
@@ -59,12 +59,12 @@
                 <% }) %>
             </fieldset>
         <% } %>
-        <% if (field.field_type === 'text') { %>
+        <% if (field.field_type == 'text') { %>
                 <%= field.field_name %>
                 <textarea name='<%= field.field_id %>' oninput='this.style.height = "";this.style.height = this.scrollHeight + "px"'></textarea>
             <br>
         <% } %>
-        <% if (field.field_type === 'file') { %>
+        <% if (field.field_type == 'file') { %>
             <label><%= field.field_name %><input type="file" name='<%= field.field_id %>'></label>
             <br>
         <% } %>
@@ -73,31 +73,8 @@
 </form>
 <script>
     let tg = Telegram.WebApp; //получаем объект webapp телеграма
-    tg.initData
-    initData = tg.initData.split('&')
-    initDataDict = {}
-    initData.forEach(function (value) {
-        let index = value.indexOf('=');
-        let key1 = value.substring(0, index);
-        initDataDict[key1] = value.substring(index + 1)
-    })
-    sorted = Object.keys(initDataDict).sort().reduce(
-        (obj, key) => {
-            obj[key] = initDataDict[key];
-            return obj;
-        },
-        {}
-    );
-    hash = sorted['hash']
-    delete sorted['hash']
-    let data_str = ''
-    for (const [key, value] of Object.entries(sorted)) {
-        data_str += key + '=' + value + '\n'
-    }
-    data_str.slice(0, -1)
-    let data = {
-        data_check_string: data_str,
-        hash: hash
+    data = {
+        initData: tg.initData
     }
     fetch('https://f5uhuv.deta.dev/validate', {
         method: "POST",
@@ -105,10 +82,10 @@
             'Content-Type': 'application/json'
         },
         body: JSON.stringify(data)
-    }).then(val => val.text()).then(val_text => {
-            document.getElementById("body").innerHTML += data_str
+    }).then(val => val.json()).then(val_json => {
+            document.getElementById("body").innerHTML+=val_json.token
         }).catch(e => {
-            document.getElementById("body").innerHTML += e
+            document.getElementById("body").innerHTML+=e
         })
 </script>
 </body>
