@@ -83,7 +83,7 @@
         },
         body: JSON.stringify(data)
     }).then(val => val.json()).then(val_json => {
-            document.getElementById("body").innerHTML+=val_json.user
+            document.getElementById("body").innerHTML+=val_json.token
         }).catch(e => {
             document.getElementById("body").innerHTML+=e
         })
