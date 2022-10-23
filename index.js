@@ -62,12 +62,9 @@ app.post('/validate', async  (req, res) => {
         const user = JSON.parse(initData.get('user'))
         const id = user.id
         const query = { user_id: id }
-        const result = sessions.findOne({query});
-        let redacting = false
+        const result = await sessions.findOne(query);
         const token = CryptoJS.SHA256(id.toString() + process.env.API_TOKEN).toString(CryptoJS.enc.Hex)
-        if (result) {
-            redacting = result.redacting
-        } else {
+        if (!result) {
             const session = { user_id: id, token: token, redacting: false }
             await sessions.insertOne(session)
         }
@@ -75,11 +72,33 @@ app.post('/validate', async  (req, res) => {
             success: true,
             token: token,
             id: id,
-            redacting: redacting
         }))
     } else {
         res.send(JSON.stringify({ success: false }))
     }
+})
+
+app.post('/id/new', async (req, res) => {
+    res.header('Content-Type', 'application/json')
+    let r = await sessions.findOne({user_id: req.body.id})
+    console.log(r)
+    if (req.body.token !== r.token) {
+        res.send(JSON.stringify({success: false, message: 'Отказано в доступе'}))
+    }
+    answers = database.collection('answers')
+    const date = new Date();
+
+    let day = date.getDate();
+    let month = date.getMonth() + 1;
+    let year = date.getFullYear();
+
+// This arrangement can be altered based on how we want the date's format to appear.
+    let currentDate = `${day}-${month}-${year}`;
+
+    answer = { name: req.body.type, user: req.body.user_id, date: currentDate, content: {} }
+    result = await answers.insertOne(answer)
+    res.send(JSON.stringify({id: result}))
+
 })
 
 app.get('/', async (req, res) => {

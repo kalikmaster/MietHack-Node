@@ -61,6 +61,8 @@
     data = {
         initData: tg.initData
     }
+    var user_data
+    var form_new_id
     fetch('/validate', {
         method: "POST",
         headers: {
@@ -69,7 +71,25 @@
         body: JSON.stringify(data)
     }).then(val => val.json()).then(val_json => {
             if (val_json.success) {
-                var user_data = { id: val_json.id, token: val_json.token }
+                user_data = { id: val_json.id, token: val_json.token }
+                <% if ( form_id  === 'new') { %>
+                    fetch('/id/new', {
+                        method: "POST",
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            user_id: user_data.id,
+                            token: user_data.token,
+                            type: '<%=form_type%>'
+                        })
+                    }).then(val => val.json()).then(new_val_json => {
+                        form_new_id = new_val_json.id
+                    })
+                <% } else { %>
+                    form_new_id = <%=form_id%>
+                <% } %>
+                fetch('/')
                 fetch('/forms/load/' + '<%= form_type %>', {
                     method: "POST",
                     headers: {
@@ -108,14 +128,18 @@
                     }
                     document.getElementById('main-form').innerHTML = html_output
                 })
-                fetch('/forms/load/' + '<%= form_type %>' + '/' + '<%= form_id %>', {
+                fetch('/forms/load/' + '<%= form_type %>' + '/' + form_new_id, {
                     method: "POST",
                     headers: {
                         'Content-Type': 'application/json'
                     },
                     body: JSON.stringify(user_data)
                 }).then(val => val.json()).then(val_json => {
-                    //document.getElementById("body").innerHTML+= typeof val_json.success
+                    if (!val_json.success) {
+                        document.getElementById("body").innerHTML+= val_json.message
+                    } else {
+
+                    }
                 })
             }
         }).catch(e => {
@@ -123,6 +147,23 @@
         })
     tg.MainButton.setText("Отправить изменения"); //изменяем текст кнопки иначе
     tg.MainButton.show()
+    tg.onEvent('mainButtonClicked', function () {
+        let data = new FormData(document.getElementById('main-form'))
+        const formData = Object.fromEntries(data.entries())
+        let dataToSend = {
+            user_id: user_data.id,
+            id: form_new_id,
+            name: '<%= form_type %>',
+            content: formData
+        }
+        fetch('https://https://miet-hack-api.herokuapp.com/save-session', {
+            method: "POST",
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(dataToSend)
+        }).then(tg.close())
+    })
 </script>
 </body>
 </html>
