@@ -41,52 +41,75 @@
     </style>
 </head>
 <body id="body">
-<form>
-    <% form.forEach(function(field) { %>
-        <% if (field.field_type == 'checkbox') { %>
-            <fieldset>
-                <legend><%= field.field_name %></legend>
-                <% Object.values(field.field_values).forEach(function(box) { %>
-                    <input type='checkbox' name='<%= field.field_id %>'><%= box %><br>
-                <% }) %>
-            </fieldset>
-        <% } %>
-        <% if (field.field_type == 'radiobox') { %>
-            <fieldset>
-                <legend><%= field.field_name %></legend>
-                <% Object.values(field.field_values).forEach(function(box) { %>
-                    <input type='radio' name='<%= field.field_id %>'><%= box %><br>
-                <% }) %>
-            </fieldset>
-        <% } %>
-        <% if (field.field_type == 'text') { %>
-                <%= field.field_name %>
-                <textarea name='<%= field.field_id %>' oninput='this.style.height = "";this.style.height = this.scrollHeight + "px"'></textarea>
-            <br>
-        <% } %>
-        <% if (field.field_type == 'file') { %>
-            <label><%= field.field_name %><input type="file" name='<%= field.field_id %>'></label>
-            <br>
-        <% } %>
-        <br>
-    <% }); %>
+<form id="main-form">
 </form>
 <script>
     let tg = Telegram.WebApp; //получаем объект webapp телеграма
     data = {
         initData: tg.initData
     }
-    fetch('https://f5uhuv.deta.dev/validate', {
+    fetch('/validate', {
         method: "POST",
         headers: {
             'Content-Type': 'application/json'
         },
         body: JSON.stringify(data)
     }).then(val => val.json()).then(val_json => {
-            document.getElementById("body").innerHTML+=val_json.token
+            if (val_json.success) {
+                var user_data = { id: val_json.id, token: val_json.token }
+                fetch('/forms/load/' + '<%= form_type %>', {
+                    method: "POST",
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(user_data)
+                }).then(val => val.json()).then(val_json => {
+                    var html_output = ''
+                    for (const [key, value] of Object.entries(val_json.form)) {
+                        if (value.field_type === 'checkbox') {
+                            html_output += '<fieldset>'
+                            html_output += '<legend>' + value.field_name + '</legend>'
+                            for (const val of  Object.values(value.field_values)) {
+                                html_output += '<input type="checkbox" name="' + value.field_id + '">' + val + '<br>'
+                            }
+                            html_output += '</fieldset>'
+                        }
+                        if (value.field_type === 'radiobox') {
+                            html_output += '<fieldset>'
+                            html_output += '<legend>' + value.field_name + '</legend>'
+                            for (const val of  Object.values(value.field_values)) {
+                                html_output += '<input type="radio" name="' + value.field_id + '">' + val + '<br>'
+                            }
+                            html_output += '</fieldset>'
+                        }
+                        if (value.field_type === 'text') {
+                            html_output += value.field_name
+                            html_output += '<textarea name="' + value.field_id + '" oninput=\'this.style.height = "";this.style.height = this.scrollHeight + "px"\'></textarea>'
+                            html_output += '<br>'
+                        }
+                        if (value.field_type === 'file') {
+                            html_output += '<label>' + value.field_name + '<input type="file" name=' + value.field_id + '></label>'
+                            html_output += '<br>'
+                        }
+                        html_output += '<br>'
+                    }
+                    document.getElementById('main-form').innerHTML = html_output
+                })
+                fetch('/forms/load/' + '<%= form_type %>' + '/' + '<%= form_id %>', {
+                    method: "POST",
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(user_data)
+                }).then(val => val.json()).then(val_json => {
+                    //document.getElementById("body").innerHTML+= typeof val_json.success
+                })
+            }
         }).catch(e => {
             document.getElementById("body").innerHTML+=e
         })
+    tg.MainButton.setText("Отправить изменения"); //изменяем текст кнопки иначе
+    tg.MainButton.show()
 </script>
 </body>
 </html>
