@@ -80,13 +80,18 @@ app.post('/validate', async  (req, res) => {
 
 app.post('/id/new', async (req, res) => {
     res.header('Content-Type', 'application/json')
-    let r = await sessions.findOne({user_id: req.body.id})
+    let r = await sessions.findOne({user_id: req.body.user_id})
     console.log(r)
+
+
     if (req.body.token !== r.token) {
         res.send(JSON.stringify({success: false, message: 'Отказано в доступе'}))
     }
+
     answers = database.collection('answers')
     const date = new Date();
+
+
 
     let day = date.getDate();
     let month = date.getMonth() + 1;
