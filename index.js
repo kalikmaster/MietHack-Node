@@ -15,7 +15,7 @@ const forms = database.collection('forms');
 const sessions = database.collection('sessions');
 const validate = require('./validate.js')
 
-app.post('/forms/load/:type/:id', async (req, res) => {
+app.post('/forms/load/:id', async (req, res) => {
     res.header('Content-Type', 'application/json')
     let r = await sessions.findOne({user_id: req.body.id})
     console.log(r)
@@ -50,9 +50,13 @@ app.post('/forms/load/:type', async (req, res) => {
 })
 
 app.get('/forms/:type/:id', async (req, res) => {
-    const query = { title: req.params.type }
+    const query = { name: req.params.type }
     const form = await forms.findOne(query);
     res.render('form', { form_type: req.params.type, form_id: req.params.id })
+})
+
+app.get('/forms/:type', async (req, res) => {
+    res.render('form_new', { form_type: req.params.type })
 })
 
 app.post('/validate', async  (req, res) => {
@@ -62,9 +66,12 @@ app.post('/validate', async  (req, res) => {
         const user = JSON.parse(initData.get('user'))
         const id = user.id
         const query = { user_id: id }
-        const result = sessions.findOne({query});
+        console.log(query)
+        const result = await sessions.findOne(query);
         let redacting = false
+        console.log(result)
         const token = CryptoJS.SHA256(id.toString() + process.env.API_TOKEN).toString(CryptoJS.enc.Hex)
+        console.log(token)
         if (result) {
             redacting = result.redacting
         } else {

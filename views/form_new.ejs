@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Form</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <style>
+        body{
+            color: var(--tg-theme-text-color);
+            background: var(--tg-theme-bg-color);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            font-size: 18px;
+        }
+
+        textarea {
+            resize: vertical;
+            width: 100%;
+            box-sizing: border-box;
+        }
+
+        .hint{
+            color: var(--tg-theme-hint-color);
+        }
+
+        .link{
+            color: var(--tg-theme-link-color);
+        }
+
+        .button{
+            background: var(--tg-theme-button-color);
+            color: var(--tg-theme-button-text-color);
+            border: none;
+            font-size: 18px;
+        }
+
+        .button:not(:last-child){
+            margin-bottom: 20px
+        }
+    </style>
+</head>
+<body id="body">
+<form id="main-form">
+</form>
+<script>
+    let tg = Telegram.WebApp; //получаем объект webapp телеграма
+    data = {
+        initData: tg.initData
+    }
+    var user_data
+    fetch('/validate', {
+        method: "POST",
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(data)
+    }).then(val => val.json()).then(val_json => {
+        if (val_json.success) {
+            user_data = { id: val_json.id, token: val_json.token }
+            fetch('/forms/load/' + '<%= form_type %>', {
+                method: "POST",
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(user_data)
+            }).then(val => val.json()).then(val_json => {
+                var html_output = ''
+                for (const [key, value] of Object.entries(val_json.form)) {
+                    if (value.field_type === 'checkbox') {
+                        html_output += '<fieldset>'
+                        html_output += '<legend>' + value.field_name + '</legend>'
+                        for (const val of  Object.values(value.field_values)) {
+                            html_output += '<input type="checkbox" name="' + value.field_id + '">' + val + '<br>'
+                        }
+                        html_output += '</fieldset>'
+                    }
+                    if (value.field_type === 'radiobox') {
+                        html_output += '<fieldset>'
+                        html_output += '<legend>' + value.field_name + '</legend>'
+                        for (const val of  Object.values(value.field_values)) {
+                            html_output += '<input type="radio" name="' + value.field_id + '">' + val + '<br>'
+                        }
+                        html_output += '</fieldset>'
+                    }
+                    if (value.field_type === 'text') {
+                        html_output += value.field_name
+                        html_output += '<textarea name="' + value.field_id + '" oninput=\'this.style.height = "";this.style.height = this.scrollHeight + "px"\'></textarea>'
+                        html_output += '<br>'
+                    }
+                    if (value.field_type === 'file') {
+                        html_output += '<label>' + value.field_name + '<input type="file" name=' + value.field_id + '></label>'
+                        html_output += '<br>'
+                    }
+                    html_output += '<br>'
+                }
+                document.getElementById('main-form').innerHTML = html_output
+            })
+        }
+    }).catch(e => {
+        document.getElementById("body").innerHTML+=e
+    })
+    tg.MainButton.setText("Отправить изменения"); //изменяем текст кнопки иначе
+    tg.MainButton.show()
+    tg.onEvent('mainButtonClicked', function(){
+        var data = new FormData(document.getElementById('main-form'))
+        const formData = Object.fromEntries(data.entries());
+        var dataToSend = JSON.stringify({
+            name: user_data.id,
+            content: formData
+        })
+        fetch('https://miet-hack-api.herokuapp.com/save-session', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: dataToSend
+        }).then().then(tg.close()).catch(tg.hint('Ошибка доступа к серверу'))
+    })
+</script>
+</body>
+</html>
