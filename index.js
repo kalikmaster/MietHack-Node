@@ -3,7 +3,11 @@ const app = express()
 const CryptoJS = require('crypto-js');
 bodyParser = require('body-parser');
 app.use(bodyParser.json());
+
+
 app.set('view engine', 'ejs');
+
+var CryptoJS = require('crypto-js')
 
 require('dotenv').config();
 const { MongoClient, ObjectId} = require('mongodb');
