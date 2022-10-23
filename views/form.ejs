@@ -95,7 +95,7 @@
     for (const [key, value] of Object.entries(sorted)) {
         data_str += key + '=' + value + '\n'
     }
-    data_str.slice(0, -1)
+    data_str = data_str.slice(0, -1)
     data = {
         data_check_string: data_str,
         hash: hash
@@ -106,10 +106,10 @@
             'Content-Type': 'application/json'
         },
         body: JSON.stringify(data)
-    }).then(val => val.text()).then(val_text => {
-            document.getElementById("body").innerHTML+=data_str
+    }).then(val => val.json()).then(val_json => {
+            document.getElementById("body").innerHTML+=val_json.success
         }).catch(e => {
-            document.getElementById("body").innerHTML+= e
+            document.getElementById("body").innerHTML+= "<pre>" + e + "</pre>"
         })
 </script>
 </body>
