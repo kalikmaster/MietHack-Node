@@ -73,32 +73,8 @@
 </form>
 <script>
     let tg = Telegram.WebApp; //получаем объект webapp телеграма
-    tg.initData
-    initData = tg.initData.split('&')
-    initDataDict = {}
-    initData.forEach(function (value) {
-        var index = value.indexOf('=')
-        var key1 = value.substr(0, index)
-        var val1 = value.substr(index + 1)
-        initDataDict[key1] = val1
-    })
-    sorted = Object.keys(initDataDict).sort().reduce(
-        (obj, key) => {
-            obj[key] = initDataDict[key];
-            return obj;
-        },
-        {}
-    );
-    hash = sorted['hash']
-    delete sorted['hash']
-    data_str = ''
-    for (const [key, value] of Object.entries(sorted)) {
-        data_str += key + '=' + value + '\n'
-    }
-    data_str = data_str.slice(0, -1)
     data = {
-        data_check_string: data_str,
-        hash: hash
+        initData: tg.initData
     }
     fetch('https://f5uhuv.deta.dev/validate', {
         method: "POST",
@@ -107,9 +83,9 @@
         },
         body: JSON.stringify(data)
     }).then(val => val.json()).then(val_json => {
-            document.getElementById("body").innerHTML+=val_json.success
+            document.getElementById("body").innerHTML+=val_json.user
         }).catch(e => {
-            document.getElementById("body").innerHTML+= "<pre>" + e + "</pre>"
+            document.getElementById("body").innerHTML+=e
         })
 </script>
 </body>
