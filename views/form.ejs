@@ -43,7 +43,7 @@
 <body id="body">
 <form>
     <% form.forEach(function(field) { %>
-        <% if (field.field_type == 'checkbox') { %>
+        <% if (field.field_type === 'checkbox') { %>
             <fieldset>
                 <legend><%= field.field_name %></legend>
                 <% Object.values(field.field_values).forEach(function(box) { %>
@@ -51,7 +51,7 @@
                 <% }) %>
             </fieldset>
         <% } %>
-        <% if (field.field_type == 'radiobox') { %>
+        <% if (field.field_type === 'radiobox') { %>
             <fieldset>
                 <legend><%= field.field_name %></legend>
                 <% Object.values(field.field_values).forEach(function(box) { %>
@@ -59,12 +59,12 @@
                 <% }) %>
             </fieldset>
         <% } %>
-        <% if (field.field_type == 'text') { %>
+        <% if (field.field_type === 'text') { %>
                 <%= field.field_name %>
                 <textarea name='<%= field.field_id %>' oninput='this.style.height = "";this.style.height = this.scrollHeight + "px"'></textarea>
             <br>
         <% } %>
-        <% if (field.field_type == 'file') { %>
+        <% if (field.field_type === 'file') { %>
             <label><%= field.field_name %><input type="file" name='<%= field.field_id %>'></label>
             <br>
         <% } %>
@@ -77,10 +77,9 @@
     initData = tg.initData.split('&')
     initDataDict = {}
     initData.forEach(function (value) {
-        var index = value.indexOf('=')
-        var key1 = value.substr(0, index)
-        var val1 = value.substr(index + 1)
-        initDataDict[key1] = val1
+        let index = value.indexOf('=');
+        let key1 = value.substring(0, index);
+        initDataDict[key1] = value.substring(index + 1)
     })
     sorted = Object.keys(initDataDict).sort().reduce(
         (obj, key) => {
@@ -91,12 +90,12 @@
     );
     hash = sorted['hash']
     delete sorted['hash']
-    data_str = ''
+    let data_str = ''
     for (const [key, value] of Object.entries(sorted)) {
         data_str += key + '=' + value + '\n'
     }
     data_str.slice(0, -1)
-    data = {
+    let data = {
         data_check_string: data_str,
         hash: hash
     }
@@ -107,9 +106,9 @@
         },
         body: JSON.stringify(data)
     }).then(val => val.text()).then(val_text => {
-            document.getElementById("body").innerHTML+=data_str
+            document.getElementById("body").innerHTML += data_str
         }).catch(e => {
-            document.getElementById("body").innerHTML+= e
+            document.getElementById("body").innerHTML += e
         })
 </script>
 </body>
