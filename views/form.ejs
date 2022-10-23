@@ -4,14 +4,16 @@
     <meta charset="UTF-8">
     <title>Title1</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <link href='https://fonts.googleapis.com/css?family=Roboto' rel='stylesheet' />
     <style>
-        body{
+        body {
             color: var(--tg-theme-text-color);
             background: var(--tg-theme-bg-color);
             display: flex;
             flex-direction: column;
             align-items: center;
             font-size: 18px;
+            font-family: Roboto, sans-serif;
         }
 
         textarea {
@@ -37,6 +39,17 @@
 
         .button:not(:last-child){
             margin-bottom: 20px
+        }
+
+        .check input:checked {
+            background-color: var(--tg-theme-button-color);
+        }
+        input[type=checkbox] {
+            color: var(--tg-theme-text-color);
+        }
+        fieldset {
+            display: block;
+            border: none;
         }
     </style>
 </head>
@@ -70,7 +83,7 @@
                             html_output += '<fieldset>'
                             html_output += '<legend>' + value.field_name + '</legend>'
                             for (const val of  Object.values(value.field_values)) {
-                                html_output += '<input type="checkbox" name="' + value.field_id + '">' + val + '<br>'
+                                html_output += '<input type="checkbox" class="check" name="' + value.field_id + '">' + val + '<br>'
                             }
                             html_output += '</fieldset>'
                         }
